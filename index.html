@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>苏浩哲 · 测控技术与仪器</title>
+  <meta name="description" content="苏浩哲，华北电力大学测控技术与仪器专业。嵌入式视觉、电控系统、机器学习。排名 5/94，国家二等奖。">
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700;900&family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- ====== Navigation ====== -->
+  <nav class="nav" id="nav">
+    <span class="nav-logo">SHZ</span>
+    <div class="nav-links">
+      <a href="#about" class="nav-link">关于</a>
+      <a href="#education" class="nav-link">学业</a>
+      <a href="#projects" class="nav-link">项目</a>
+      <a href="#research" class="nav-link">研究</a>
+      <a href="#awards" class="nav-link">获奖</a>
+      <a href="#lab" class="nav-link">实验室</a>
+      <a href="#contact" class="nav-link">联系</a>
+    </div>
+  </nav>
+
+  <!-- ====== Hero — 精密观测台 ====== -->
+  <header class="hero">
+    <canvas class="hero-canvas" id="heroCanvas"></canvas>
+    <div class="hero-overlay"></div>
+
+    <div class="hero-content">
+      <div class="hero-badge">华北电力大学 · 211 & 双一流</div>
+      <h1 class="hero-name">
+        <span class="hero-char" style="--i:0">苏</span>
+        <span class="hero-char" style="--i:1">浩</span>
+        <span class="hero-char" style="--i:2">哲</span>
+      </h1>
+      <p class="hero-tagline">
+        <span class="tagline-segment">嵌入式视觉</span>
+        <span class="tagline-dot">·</span>
+        <span class="tagline-segment">电控系统</span>
+        <span class="tagline-dot">·</span>
+        <span class="tagline-segment">机器学习</span>
+      </p>
+      <p class="hero-meta">
+        控制与计算机工程学院 · 测控技术与仪器 · 综合排名 <strong>5/94</strong>
+      </p>
+      <div class="hero-stats">
+        <div class="hero-stat">
+          <span class="hero-stat-value counter" data-target="85.63" data-decimals="2">0</span>
+          <span class="hero-stat-label">学分绩点</span>
+        </div>
+        <div class="hero-stat">
+          <span class="hero-stat-value">5<span class="hero-stat-unit">/94</span></span>
+          <span class="hero-stat-label">综合排名</span>
+        </div>
+        <div class="hero-stat">
+          <span class="hero-stat-value counter" data-target="515" data-decimals="0">0</span>
+          <span class="hero-stat-label">CET6</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="scroll-indicator">
+      <span class="scroll-line"></span>
+    </div>
+  </header>
+
+  <!-- ====== About ====== -->
+  <section id="about" class="section">
+    <div class="section-eyebrow reveal">About</div>
+    <h2 class="section-title reveal">关于我</h2>
+
+    <div class="about-layout reveal">
+      <div class="about-photo-wrapper">
+        <div class="about-photo-ring"></div>
+        <img class="about-photo" src="photo.jpg" alt="苏浩哲" loading="lazy">
+      </div>
+      <div class="about-text">
+        <p class="about-intro">
+          高中就读于浙江省温州中学，现为华北电力大学测控技术与仪器专业大三学生。
+          大一加入 <strong>Hunters 实验室</strong>，从嵌入式开发与电路调试起步；
+          大二担任<strong>电赛队长</strong>获<strong>全国二等奖</strong>（前 6.8%），同年获<strong>比亚迪奖学金（5/1500）</strong>；
+          大三进入课题组，研究<strong>燃煤锅炉温度场数字孪生重建</strong>。
+        </p>
+        <p class="about-intro">
+          现任智能车实验室负责人与 Hunters 实验室核心成员，为团队提供视觉与控制技术支持。
+          一项实用新型专利正在受理中。
+        </p>
+
+        <div class="skill-cloud">
+          <span class="skill-tag">Python</span>
+          <span class="skill-tag">C</span>
+          <span class="skill-tag">Matlab</span>
+          <span class="skill-tag">PyTorch</span>
+          <span class="skill-tag">SolidWorks</span>
+          <span class="skill-tag">Keil</span>
+          <span class="skill-tag">OpenMV</span>
+          <span class="skill-tag">K230</span>
+          <span class="skill-tag">STM32</span>
+          <span class="skill-tag">OpenCV</span>
+          <span class="skill-tag">嵌入式电控</span>
+          <span class="skill-tag">计算机视觉</span>
+          <span class="skill-tag">机器学习</span>
+        </div>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- ====== Education ====== -->
+  <section id="education" class="section section--alt">
+    <div class="section-eyebrow reveal">Education</div>
+    <h2 class="section-title reveal">核心课程</h2>
+
+    <div class="course-grid reveal">
+      <div class="course-card">
+        <div class="course-score">94</div>
+        <div class="course-name">数字信号处理</div>
+        <div class="course-bar"><div class="course-bar-fill" style="--w:94%"></div></div>
+      </div>
+      <div class="course-card">
+        <div class="course-score">98</div>
+        <div class="course-name">传感器原理与应用</div>
+        <div class="course-bar"><div class="course-bar-fill" style="--w:98%"></div></div>
+      </div>
+      <div class="course-card">
+        <div class="course-score">96</div>
+        <div class="course-name">误差理论与数据处理</div>
+        <div class="course-bar"><div class="course-bar-fill" style="--w:96%"></div></div>
+      </div>
+      <div class="course-card">
+        <div class="course-score">99</div>
+        <div class="course-name">现代电力工程师</div>
+        <div class="course-bar"><div class="course-bar-fill" style="--w:99%"></div></div>
+      </div>
+      <div class="course-card">
+        <div class="course-score">94</div>
+        <div class="course-name">过程参数检测技术</div>
+        <div class="course-bar"><div class="course-bar-fill" style="--w:94%"></div></div>
+      </div>
+      <div class="course-card">
+        <div class="course-score">96</div>
+        <div class="course-name">自动控制原理</div>
+        <div class="course-bar"><div class="course-bar-fill" style="--w:96%"></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====== Projects ====== -->
+  <section id="projects" class="section">
+    <div class="section-eyebrow reveal">Projects</div>
+    <h2 class="section-title reveal">科研与项目</h2>
+
+    <!-- Project 1: 电赛 -->
+    <div class="project-card reveal">
+      <div class="project-number">01</div>
+      <div class="project-header">
+        <div class="project-meta-row">
+          <span class="project-date">2025.05 – 2025.08</span>
+          <span class="project-role">队长 · 视觉 & 控制</span>
+          <span class="project-badge gold">国家二等奖</span>
+          <span class="project-badge gold">北京赛区一等奖</span>
+        </div>
+        <h3 class="project-title">全国大学生电子设计竞赛 — 简易自行瞄准装置</h3>
+      </div>
+      <div class="project-body">
+        <div class="project-challenge">
+          <h4>挑战</h4>
+          <p>四天三夜极限完成一套自动循迹小车 + 二维云台瞄准系统。小车沿黑色轨迹逆时针行驶，车载 405nm 蓝紫激光笔需在行进中自动瞄准并命中 A4 幅面紫外感光靶，光斑直径 ≤ 0.5cm。发挥部分要求光斑沿靶面圆弧同步画圆，同步误差 ≤ 1/4 圈。</p>
+        </div>
+        <div class="project-solution">
+          <h4>方案</h4>
+          <p>K230 嵌入式平台（RISC-V + KPU NPU）部署轻量化 YOLO 检测 + 传统颜色分割 / 霍夫圆检测混合方案。球坐标空间解算 + 变比例串级 PID 控制（偏差大时 P 大，偏差小时 P 小），三颗异构 MCU（视觉处理器 → 逻辑主控 → 运动控制器）串口通讯。</p>
+        </div>
+        <div class="project-metrics">
+          <div class="metric"><span class="metric-value">30ms</span><span class="metric-label">检测-解算-通讯全流程</span></div>
+          <div class="metric"><span class="metric-value">±5mm</span><span class="metric-label">瞄准精度</span></div>
+          <div class="metric"><span class="metric-value">2s</span><span class="metric-label">全角度搜索-瞄准-打靶</span></div>
+          <div class="metric"><span class="metric-value">前 6.8%</span><span class="metric-label">全国排名</span></div>
+        </div>
+        <div class="project-gallery">
+          <div class="gallery-item" data-src="img/e-contest/01-视觉代码.png">
+            <img src="img/e-contest/01-视觉代码.png" alt="视觉检测代码" loading="lazy">
+            <span class="gallery-caption">视觉检测代码</span>
+          </div>
+          <div class="gallery-item" data-src="img/e-contest/02-电路设计图.png">
+            <img src="img/e-contest/02-电路设计图.png" alt="电路设计图" loading="lazy">
+            <span class="gallery-caption">电路设计图</span>
+          </div>
+          <div class="gallery-item" data-src="img/e-contest/03-小车与云台.jpg">
+            <img src="img/e-contest/03-小车与云台.jpg" alt="小车与云台" loading="lazy">
+            <span class="gallery-caption">小车与云台</span>
+          </div>
+          <div class="gallery-item" data-src="img/e-contest/04-K230平台.jpg">
+            <img src="img/e-contest/04-K230平台.jpg" alt="K230嵌入式平台" loading="lazy">
+            <span class="gallery-caption">K230 嵌入式平台</span>
+          </div>
+          <div class="gallery-item" data-src="img/e-contest/07-校赛相控阵雷达.png">
+            <img src="img/e-contest/07-校赛相控阵雷达.png" alt="校赛相控阵雷达" loading="lazy">
+            <span class="gallery-caption">校赛相控阵雷达</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Project 2: 智能车 -->
+    <div class="project-card reveal">
+      <div class="project-number">02</div>
+      <div class="project-header">
+        <div class="project-meta-row">
+          <span class="project-date">2025.03 – 2025.07</span>
+          <span class="project-role">视觉方向负责人</span>
+          <span class="project-badge">省级三等奖</span>
+        </div>
+        <h3 class="project-title">全国大学生智能汽车竞赛 — 双车跟随组</h3>
+      </div>
+      <div class="project-body">
+        <div class="project-challenge">
+          <h4>挑战</h4>
+          <p>双车禁止无线 / 超声波通讯。后车摄像头须置于车尾，距前轮 > 15cm，镜头中心高度 ≤ 10cm，不得俯视赛道——从根本上剥夺了直接观察赛道的能力，完全依赖前车 LED 灯光信号进行视觉追踪。赛道包含环岛等复杂元素，过弯时灯光目标运动模式剧烈变化。</p>
+        </div>
+        <div class="project-solution">
+          <h4>方案</h4>
+          <p>前车：图像预处理 → 逆透视变换 → 滑动窗口赛道边界搜索 → 灯光编码发送（曼彻斯特编码）。后车：FFT 频域提取灯光调制频率 → 动态 ROI + 卡尔曼滤波预测 → 抗环境光干扰（遮光罩 + 曝光控制 + 时序滤波）。自主设计驱动板。</p>
+        </div>
+        <div class="project-metrics">
+          <div class="metric"><span class="metric-value">6ms</span><span class="metric-label">捕获+处理+识别每帧</span></div>
+          <div class="metric"><span class="metric-value">2.5 m/s</span><span class="metric-label">双车协同速度</span></div>
+          <div class="metric"><span class="metric-value">1kHz</span><span class="metric-label">灯光调制频率</span></div>
+          <div class="metric"><span class="metric-value">90s</span><span class="metric-label">完整跟随时限</span></div>
+        </div>
+        <div class="project-gallery">
+          <div class="gallery-item" data-src="img/smartcar/01-双车代码.png">
+            <img src="img/smartcar/01-双车代码.png" alt="双车跟随代码" loading="lazy">
+            <span class="gallery-caption">双车跟随代码</span>
+          </div>
+          <div class="gallery-item" data-src="img/smartcar/02-双车实物图.jpg">
+            <img src="img/smartcar/02-双车实物图.jpg" alt="双车实物图" loading="lazy">
+            <span class="gallery-caption">双车实物图</span>
+          </div>
+          <div class="gallery-item" data-src="img/smartcar/03-前车照片.jpg">
+            <img src="img/smartcar/03-前车照片.jpg" alt="前车照片" loading="lazy">
+            <span class="gallery-caption">前车照片</span>
+          </div>
+          <div class="gallery-item" data-src="img/smartcar/04-视觉图像-sobel算子.png">
+            <img src="img/smartcar/04-视觉图像-sobel算子.png" alt="视觉图像Sobel算子" loading="lazy">
+            <span class="gallery-caption">视觉图像 (Sobel 算子)</span>
+          </div>
+          <div class="gallery-item" data-src="img/smartcar/05-电机编码器曲线.jpg">
+            <img src="img/smartcar/05-电机编码器曲线.jpg" alt="电机编码器曲线" loading="lazy">
+            <span class="gallery-caption">电机编码器曲线</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Project 3: 锅炉数字孪生 -->
+    <div class="project-card reveal">
+      <div class="project-number">03</div>
+      <div class="project-header">
+        <div class="project-meta-row">
+          <span class="project-date">2026.03 – 至今</span>
+          <span class="project-role">课题负责人</span>
+        </div>
+        <h3 class="project-title">燃煤锅炉温度场数字孪生模型</h3>
+      </div>
+      <div class="project-body">
+        <div class="project-challenge">
+          <h4>挑战</h4>
+          <p>锅炉炉膛内部温度极高，测温点仅能布置在炉壁有限位置。核心问题：利用稀疏传感器数据反演炉膛截面连续温度场分布。CFD 数值模拟单次计算约 12 小时，需降阶模型实现秒级重建；锅炉变工况运行时温度场非线性变化剧烈，传统线性 POD 方法捕捉能力有限。</p>
+        </div>
+        <div class="project-solution">
+          <h4>方案</h4>
+          <p>提出高维流场压缩至独立单标量潜空间、解码器共享高维输入的改进方法，融合 POD（物理可解释性）与 CAE（非线性表达能力）优势。采用 LSSVM 完成边界条件到潜变量的回归预测——相比普通神经网络，LSSVM 在小样本条件下泛化能力更好。</p>
+        </div>
+        <div class="project-metrics">
+          <div class="metric"><span class="metric-value">0.9734</span><span class="metric-label">温度场 R²</span></div>
+          <div class="metric"><span class="metric-value">0.9680</span><span class="metric-label">速度场 R²</span></div>
+          <div class="metric"><span class="metric-value">+3.6%/+16.6%</span><span class="metric-label">较基准提升</span></div>
+          <div class="metric"><span class="metric-value">秒级</span><span class="metric-label">重建速度 (vs CFD 12h)</span></div>
+        </div>
+        <div class="project-gallery">
+          <div class="gallery-item" data-src="img/boiler/01-温度场重建.png">
+            <img src="img/boiler/01-温度场重建.png" alt="温度场重建结果" loading="lazy">
+            <span class="gallery-caption">温度场重建结果</span>
+          </div>
+          <div class="gallery-item" data-src="img/boiler/02-POD模态分解.png">
+            <img src="img/boiler/02-POD模态分解.png" alt="POD模态分解" loading="lazy">
+            <span class="gallery-caption">POD 模态分解</span>
+          </div>
+          <div class="gallery-item" data-src="img/boiler/03-误差架构图.png">
+            <img src="img/boiler/03-误差架构图.png" alt="误差架构图" loading="lazy">
+            <span class="gallery-caption">误差架构图</span>
+          </div>
+          <div class="gallery-item" data-src="img/boiler/04-代码.png">
+            <img src="img/boiler/04-代码.png" alt="模型代码" loading="lazy">
+            <span class="gallery-caption">模型代码</span>
+          </div>
+          <div class="gallery-item" data-src="img/boiler/05-软聚类.png">
+            <img src="img/boiler/05-软聚类.png" alt="软聚类分析" loading="lazy">
+            <span class="gallery-caption">软聚类分析</span>
+          </div>
+          <div class="gallery-item" data-src="img/boiler/06-LSSVM预测.png">
+            <img src="img/boiler/06-LSSVM预测.png" alt="LSSVM预测结果" loading="lazy">
+            <span class="gallery-caption">LSSVM 预测结果</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====== Research Interest ====== -->
+  <section id="research" class="section section--alt">
+    <div class="section-eyebrow reveal">Vision</div>
+    <h2 class="section-title reveal">研究方向</h2>
+
+    <div class="research-content reveal">
+      <p class="research-intro">
+        研究生阶段希望扎根于<strong>视觉感知、智能控制与具身智能</strong>的交叉领域。具身智能的核心挑战——智能体在开放环境中实时感知、理解物理世界并做出可靠决策——与我在竞赛中面对的运动平台视觉伺服问题本质一致：摄像头捕捉的是智能体与环境持续交互中的动态视觉流，感知结果直接影响控制指令，控制执行反过来改变下一帧观测。这种<strong>感知-行动闭环</strong>恰好落在控制工程的学科脉络中。
+      </p>
+
+      <div class="research-areas">
+        <div class="research-area">
+          <div class="research-area-icon">&#9673;</div>
+          <div class="research-area-text">
+            <strong>视觉语言模型</strong>在机器人操作场景中的泛化能力
+          </div>
+        </div>
+        <div class="research-area">
+          <div class="research-area-icon">&#9673;</div>
+          <div class="research-area-text">
+            基于<strong>视觉反馈的精细操控</strong>策略
+          </div>
+        </div>
+        <div class="research-area">
+          <div class="research-area-icon">&#9673;</div>
+          <div class="research-area-text">
+            仿真到现实的<strong>迁移（Sim-to-Real）</strong>
+          </div>
+        </div>
+        <div class="research-area">
+          <div class="research-area-icon">&#9673;</div>
+          <div class="research-area-text">
+            将<strong>物理机理约束</strong>嵌入学习模型的 PINN 方向
+          </div>
+        </div>
+      </div>
+
+      <p class="research-outro">
+        不满足于在仿真环境中刷榜调参，希望技术落地到真实物理系统——让机器人在嘈杂工厂可靠抓取，在陌生家庭环境安全导航。<br>
+        这需要深厚的控制理论基础、扎实的视觉算法功底，以及对物理世界的敬畏。
+      </p>
+    </div>
+  </section>
+
+  <!-- ====== Awards ====== -->
+  <section id="awards" class="section">
+    <div class="section-eyebrow reveal">Honors</div>
+    <h2 class="section-title reveal">获奖</h2>
+
+    <div class="awards-timeline reveal">
+      <div class="award-item">
+        <div class="award-dot national"></div>
+        <div class="award-card">
+          <span class="award-level-tag national">国家级</span>
+          <span class="award-name">全国大学生电子设计竞赛 · 全国二等奖</span>
+          <span class="award-note">前 6.8% · 队长</span>
+          <span class="award-date">2025.08</span>
+        </div>
+      </div>
+      <div class="award-item">
+        <div class="award-dot provincial"></div>
+        <div class="award-card">
+          <span class="award-level-tag provincial">省部级</span>
+          <span class="award-name">电子设计竞赛 · 北京赛区一等奖</span>
+          <span class="award-note">队长</span>
+          <span class="award-date">2025.08</span>
+        </div>
+      </div>
+      <div class="award-item">
+        <div class="award-dot provincial"></div>
+        <div class="award-card">
+          <span class="award-level-tag provincial">省部级</span>
+          <span class="award-name">全国大学生智能汽车竞赛 · 省级三等奖</span>
+          <span class="award-note">视觉负责人</span>
+          <span class="award-date">2025.08</span>
+        </div>
+      </div>
+      <div class="award-item">
+        <div class="award-dot provincial"></div>
+        <div class="award-card">
+          <span class="award-level-tag provincial">省部级</span>
+          <span class="award-name">大学生创新创业项目 · 省级良好</span>
+          <span class="award-date">2025.05</span>
+        </div>
+      </div>
+      <div class="award-item">
+        <div class="award-dot provincial"></div>
+        <div class="award-card">
+          <span class="award-level-tag provincial">省部级</span>
+          <span class="award-name">北京市大学生工程设计表达竞赛 · 省级三等奖</span>
+          <span class="award-note">二维 + 三维 + 增材制造 · 队长</span>
+          <span class="award-date">2025.01</span>
+        </div>
+      </div>
+      <div class="award-item">
+        <div class="award-dot school"></div>
+        <div class="award-card">
+          <span class="award-level-tag school">校级</span>
+          <span class="award-name">电子设计竞赛 · 校级一等奖</span>
+          <span class="award-note">2/30 · 队长</span>
+          <span class="award-date">2025.05</span>
+        </div>
+      </div>
+      <div class="award-item">
+        <div class="award-dot school"></div>
+        <div class="award-card">
+          <span class="award-level-tag school">校级</span>
+          <span class="award-name">智能汽车竞赛 · 校级一等奖</span>
+          <span class="award-note">1/2 · 队长</span>
+          <span class="award-date">2025.05</span>
+        </div>
+      </div>
+      <div class="award-item">
+        <div class="award-dot school"></div>
+        <div class="award-card">
+          <span class="award-level-tag school">校级</span>
+          <span class="award-name">工程设计表达竞赛 · 校级二等奖</span>
+          <span class="award-note">7/16</span>
+          <span class="award-date">2025</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="awards-summary reveal">
+      <div class="summary-stat">
+        <span class="summary-num">1</span>
+        <span class="summary-label">国家级</span>
+      </div>
+      <div class="summary-divider"></div>
+      <div class="summary-stat">
+        <span class="summary-num">4</span>
+        <span class="summary-label">省部级</span>
+      </div>
+      <div class="summary-divider"></div>
+      <div class="summary-stat">
+        <span class="summary-num">3</span>
+        <span class="summary-label">校级</span>
+      </div>
+      <div class="summary-divider"></div>
+      <div class="summary-stat">
+        <span class="summary-num">1</span>
+        <span class="summary-label">专利受理中</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====== Lab & Engineering ====== -->
+  <section id="lab" class="section section--alt">
+    <div class="section-eyebrow reveal">Laboratory</div>
+    <h2 class="section-title reveal">实验室角色</h2>
+
+    <div class="role-cards reveal">
+      <div class="role-card">
+        <div class="role-card-icon">&#9733;</div>
+        <div class="role-card-title">智能车实验室负责人</div>
+        <div class="role-card-desc">统筹实验室技术方向与团队建设，带领成员参加全国大学生智能汽车竞赛</div>
+      </div>
+      <div class="role-card">
+        <div class="role-card-icon">&#9733;</div>
+        <div class="role-card-title">Hunters 实验室核心成员</div>
+        <div class="role-card-desc">参与 RoboMaster 机甲大师赛，负责机械结构设计与 STM32 嵌入式开发</div>
+      </div>
+      <div class="role-card">
+        <div class="role-card-icon">&#9733;</div>
+        <div class="role-card-title">RoboMaster 梯度队员</div>
+        <div class="role-card-desc">机械方向培养，参与智控生态缸等项目，理解感知-决策-执行闭环</div>
+      </div>
+    </div>
+
+    <div class="gallery-row gallery-row--sm reveal">
+      <div class="gallery-item" data-src="img/robot/01-生态缸1版.jpg">
+        <img src="img/robot/01-生态缸1版.jpg" alt="智控生态缸1版" loading="lazy">
+        <span class="gallery-caption">智控生态缸 1 版</span>
+      </div>
+      <div class="gallery-item" data-src="img/robot/02-麦轮机器人.jpg">
+        <img src="img/robot/02-麦轮机器人.jpg" alt="麦轮工程机器人" loading="lazy">
+        <span class="gallery-caption">麦轮工程机器人</span>
+      </div>
+      <div class="gallery-item" data-src="img/robot/03-RM全向步兵悬挂.jpg">
+        <img src="img/robot/03-RM全向步兵悬挂.jpg" alt="RM全向步兵悬挂" loading="lazy">
+        <span class="gallery-caption">RM 全向步兵悬挂</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====== Contact ====== -->
+  <footer id="contact" class="section footer">
+    <div class="section-eyebrow reveal">Contact</div>
+    <h2 class="section-title reveal">联系</h2>
+
+    <div class="contact-grid reveal">
+      <a class="contact-card" href="mailto:15958736009@163.com">
+        <div class="contact-icon">@</div>
+        <div class="contact-label">邮箱</div>
+        <div class="contact-value">15958736009@163.com</div>
+      </a>
+      <div class="contact-card">
+        <div class="contact-icon">&#9906;</div>
+        <div class="contact-label">所在地</div>
+        <div class="contact-value">浙江温州 → 北京</div>
+      </div>
+      <a class="contact-card" href="#" target="_blank" rel="noopener">
+        <div class="contact-icon">&#8599;</div>
+        <div class="contact-label">GitHub</div>
+        <div class="contact-value">（待提供）</div>
+      </a>
+    </div>
+
+    <div class="footer-end reveal">
+      <p class="footer-school">华北电力大学 · 控制与计算机工程学院 · 测控技术与仪器</p>
+      <p class="footer-copy">苏浩哲 &copy; 2026</p>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
