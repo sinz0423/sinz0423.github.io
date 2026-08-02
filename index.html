@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>苏浩哲 · 测控技术与仪器</title>
   <meta name="description" content="苏浩哲，华北电力大学测控技术与仪器专业。嵌入式视觉、电控系统、机器学习。排名 5/94，国家二等奖。">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23080d16'/%3E%3Ccircle cx='16' cy='16' r='9' fill='none' stroke='%235b9bd5' stroke-width='2'/%3E%3Ccircle cx='16' cy='16' r='2.5' fill='%23c8915a'/%3E%3C/svg%3E">
   <link rel="stylesheet" href="style.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -12,10 +13,17 @@
 </head>
 <body>
 
+  <!-- 装饰层：胶片颗粒 / 顶部滚动进度 / 光标光晕 -->
+  <div class="grain" aria-hidden="true"></div>
+  <div class="scroll-progress" id="scrollProgress" aria-hidden="true"></div>
+  <div class="cursor-glow" id="cursorGlow" aria-hidden="true"></div>
+
+  <noscript><style>.reveal,.award-item{opacity:1!important;transform:none!important}.course-bar-fill{transform:scaleX(1)!important}.section-title::after{transform:scaleX(1)!important}.grain,.scroll-progress,.cursor-glow,.hero-readout{display:none!important}</style></noscript>
+
   <!-- ====== Navigation ====== -->
   <nav class="nav" id="nav">
     <span class="nav-logo">SHZ</span>
-    <div class="nav-links">
+    <div class="nav-links" id="navLinks">
       <a href="#about" class="nav-link">关于</a>
       <a href="#education" class="nav-link">学业</a>
       <a href="#projects" class="nav-link">项目</a>
@@ -24,6 +32,11 @@
       <a href="#lab" class="nav-link">实验室</a>
       <a href="#contact" class="nav-link">联系</a>
     </div>
+    <button class="nav-toggle" id="navToggle" aria-label="打开菜单" aria-expanded="false" aria-controls="navLinks">
+      <span class="nav-toggle-bar"></span>
+      <span class="nav-toggle-bar"></span>
+      <span class="nav-toggle-bar"></span>
+    </button>
   </nav>
 
   <!-- ====== Hero — 精密观测台 ====== -->
@@ -66,6 +79,12 @@
 
     <div class="scroll-indicator">
       <span class="scroll-line"></span>
+    </div>
+
+    <div class="hero-readout" aria-hidden="true">
+      <span class="readout-line"><i>POS</i><b id="rdPos">-- --</b></span>
+      <span class="readout-line"><i>FRAME</i><b id="rdFrame">000000</b></span>
+      <span class="readout-line"><i>SYS</i><b class="readout-on">SCANNING<span class="readout-caret"></span></b></span>
     </div>
   </header>
 
@@ -177,10 +196,10 @@
           <p>K230 嵌入式平台（RISC-V + KPU NPU）部署轻量化 YOLO 检测 + 传统颜色分割 / 霍夫圆检测混合方案。球坐标空间解算 + 变比例串级 PID 控制（偏差大时 P 大，偏差小时 P 小），三颗异构 MCU（视觉处理器 → 逻辑主控 → 运动控制器）串口通讯。</p>
         </div>
         <div class="project-metrics">
-          <div class="metric"><span class="metric-value">30ms</span><span class="metric-label">检测-解算-通讯全流程</span></div>
-          <div class="metric"><span class="metric-value">±5mm</span><span class="metric-label">瞄准精度</span></div>
-          <div class="metric"><span class="metric-value">2s</span><span class="metric-label">全角度搜索-瞄准-打靶</span></div>
-          <div class="metric"><span class="metric-value">前 6.8%</span><span class="metric-label">全国排名</span></div>
+          <div class="metric"><span class="metric-value" data-count="30" data-suffix="ms">30ms</span><span class="metric-label">检测-解算-通讯全流程</span></div>
+          <div class="metric"><span class="metric-value" data-count="5" data-prefix="±" data-suffix="mm">±5mm</span><span class="metric-label">瞄准精度</span></div>
+          <div class="metric"><span class="metric-value" data-count="2" data-suffix="s">2s</span><span class="metric-label">全角度搜索-瞄准-打靶</span></div>
+          <div class="metric"><span class="metric-value" data-count="6.8" data-decimals="1" data-prefix="前 " data-suffix="%">前 6.8%</span><span class="metric-label">全国排名</span></div>
         </div>
         <div class="project-gallery">
           <div class="gallery-item" data-src="img/e-contest/01-视觉代码.png">
@@ -228,10 +247,10 @@
           <p>前车：图像预处理 → 逆透视变换 → 滑动窗口赛道边界搜索 → 灯光编码发送（曼彻斯特编码）。后车：FFT 频域提取灯光调制频率 → 动态 ROI + 卡尔曼滤波预测 → 抗环境光干扰（遮光罩 + 曝光控制 + 时序滤波）。自主设计驱动板。</p>
         </div>
         <div class="project-metrics">
-          <div class="metric"><span class="metric-value">6ms</span><span class="metric-label">捕获+处理+识别每帧</span></div>
-          <div class="metric"><span class="metric-value">2.5 m/s</span><span class="metric-label">双车协同速度</span></div>
-          <div class="metric"><span class="metric-value">1kHz</span><span class="metric-label">灯光调制频率</span></div>
-          <div class="metric"><span class="metric-value">90s</span><span class="metric-label">完整跟随时限</span></div>
+          <div class="metric"><span class="metric-value" data-count="6" data-suffix="ms">6ms</span><span class="metric-label">捕获+处理+识别每帧</span></div>
+          <div class="metric"><span class="metric-value" data-count="2.5" data-decimals="1" data-suffix=" m/s">2.5 m/s</span><span class="metric-label">双车协同速度</span></div>
+          <div class="metric"><span class="metric-value" data-count="1" data-suffix="kHz">1kHz</span><span class="metric-label">灯光调制频率</span></div>
+          <div class="metric"><span class="metric-value" data-count="90" data-suffix="s">90s</span><span class="metric-label">完整跟随时限</span></div>
         </div>
         <div class="project-gallery">
           <div class="gallery-item" data-src="img/smartcar/01-双车代码.png">
@@ -278,8 +297,8 @@
           <p>提出高维流场压缩至独立单标量潜空间、解码器共享高维输入的改进方法，融合 POD（物理可解释性）与 CAE（非线性表达能力）优势。采用 LSSVM 完成边界条件到潜变量的回归预测——相比普通神经网络，LSSVM 在小样本条件下泛化能力更好。</p>
         </div>
         <div class="project-metrics">
-          <div class="metric"><span class="metric-value">0.9734</span><span class="metric-label">温度场 R²</span></div>
-          <div class="metric"><span class="metric-value">0.9680</span><span class="metric-label">速度场 R²</span></div>
+          <div class="metric"><span class="metric-value" data-count="0.9734" data-decimals="4">0.9734</span><span class="metric-label">温度场 R²</span></div>
+          <div class="metric"><span class="metric-value" data-count="0.968" data-decimals="4">0.9680</span><span class="metric-label">速度场 R²</span></div>
           <div class="metric"><span class="metric-value">+3.6%/+16.6%</span><span class="metric-label">较基准提升</span></div>
           <div class="metric"><span class="metric-value">秒级</span><span class="metric-label">重建速度 (vs CFD 12h)</span></div>
         </div>

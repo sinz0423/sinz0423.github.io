@@ -3,15 +3,79 @@
    示波器扫描网格 + 滚动揭示 + 计数动画
    =================================== */
 
+// ---- 尊重系统"减少动态效果"设置 ----
+const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+// 标记 JS 可用（用于渐进增强：图片淡入、标签交错等仅 JS 时生效）
+document.documentElement.classList.add('js');
+
 // ---- Canvas: Oscilloscope Grid + Scanning Line ----
 (function() {
   const canvas = document.getElementById('heroCanvas');
-  if (!canvas) return;
+  if (!canvas || prefersReducedMotion) return;
   const ctx = canvas.getContext('2d');
 
   let w, h, scanY, scanDirection;
   const gridSize = 32;
   const scanSpeed = 0.35; // px per frame — slow & deliberate
+
+  // 数据星点：稀疏漂移的"观测样本"，光标附近连线微微增强
+  const particles = [];
+  for (let i = 0; i < 34; i++) {
+    particles.push({
+      x: Math.random(),
+      y: Math.random(),
+      vx: (Math.random() - 0.5) * 0.00013,
+      vy: (Math.random() - 0.5) * 0.00013,
+      r: Math.random() * 1.4 + 0.6
+    });
+  }
+  const pointer = { x: -9999, y: -9999, active: false };
+  if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+    window.addEventListener('mousemove', (e) => {
+      const rect = canvas.getBoundingClientRect();
+      pointer.x = e.clientX - rect.left;
+      pointer.y = e.clientY - rect.top;
+      pointer.active = true;
+    }, { passive: true });
+    canvas.addEventListener('mouseleave', () => { pointer.active = false; pointer.x = pointer.y = -9999; });
+  }
+
+  function drawParticles(cssW, cssH) {
+    const LINK = 110;
+    ctx.fillStyle = 'rgba(91,155,213,0.5)';
+    for (const p of particles) {
+      p.x += p.vx; p.y += p.vy;
+      if (p.x < 0) p.x += 1; else if (p.x > 1) p.x -= 1;
+      if (p.y < 0) p.y += 1; else if (p.y > 1) p.y -= 1;
+      ctx.beginPath();
+      ctx.arc(p.x * cssW, p.y * cssH, p.r, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.lineWidth = 0.6;
+    for (let i = 0; i < particles.length; i++) {
+      for (let j = i + 1; j < particles.length; j++) {
+        const a = particles[i], b = particles[j];
+        const ax = a.x * cssW, ay = a.y * cssH, bx = b.x * cssW, by = b.y * cssH;
+        const dx = ax - bx, dy = ay - by;
+        const d2 = dx * dx + dy * dy;
+        if (d2 < LINK * LINK) {
+          let alpha = 0.10 * (1 - Math.sqrt(d2) / LINK);
+          if (pointer.active) {
+            const mx = (ax + bx) / 2 - pointer.x;
+            const my = (ay + by) / 2 - pointer.y;
+            const md2 = mx * mx + my * my;
+            if (md2 < 160 * 160) alpha = Math.min(alpha + 0.10 * (1 - Math.sqrt(md2) / 160), 0.22);
+          }
+          ctx.strokeStyle = 'rgba(91,155,213,' + alpha.toFixed(3) + ')';
+          ctx.beginPath();
+          ctx.moveTo(ax, ay);
+          ctx.lineTo(bx, by);
+          ctx.stroke();
+        }
+      }
+    }
+  }
 
   function resize() {
     const rect = canvas.parentElement.getBoundingClientRect();
@@ -72,6 +136,9 @@
     ctx.arc(cx, cy, 2.5, 0, Math.PI * 2);
     ctx.fill();
 
+    // 数据星点连线
+    drawParticles(cssW, cssH);
+
     // Scanning line — like oscilloscope beam
     const scan = scanY;
     const glowGrad = ctx.createLinearGradient(0, scan - 30, 0, scan + 30);
@@ -111,6 +178,15 @@
 
 // ---- Scroll Reveal (Intersection Observer) ----
 (function() {
+  // 减少动态效果：直接揭示全部内容，不做滚动动画
+  if (prefersReducedMotion) {
+    document.querySelectorAll('.reveal').forEach(el => el.classList.add('revealed'));
+    document.querySelectorAll('.award-item').forEach(el => el.classList.add('revealed'));
+    document.querySelectorAll('.course-card').forEach(el => el.classList.add('revealed'));
+    document.querySelectorAll('.section-title').forEach(el => el.classList.add('revealed'));
+    return;
+  }
+
   const observer = new IntersectionObserver((entries) => {
     entries.forEach((entry, i) => {
       if (entry.isIntersecting) {
@@ -171,6 +247,15 @@
 
 // ---- Counter Animation ----
 (function() {
+  if (prefersReducedMotion) {
+    document.querySelectorAll('.counter').forEach(el => {
+      const target = parseFloat(el.dataset.target);
+      const decimals = parseInt(el.dataset.decimals) || 0;
+      el.textContent = target.toFixed(decimals);
+    });
+    return;
+  }
+
   function animateCounter(el) {
     const target = parseFloat(el.dataset.target);
     const decimals = parseInt(el.dataset.decimals) || 0;
@@ -209,20 +294,62 @@
 // ---- Navigation scroll effect ----
 (function() {
   const nav = document.getElementById('nav');
-  let lastScroll = 0;
+  if (!nav) return;
 
   function updateNav() {
-    const scrollY = window.scrollY;
-    if (scrollY > 60) {
-      nav.classList.add('scrolled');
-    } else {
-      nav.classList.remove('scrolled');
-    }
-    lastScroll = scrollY;
-    requestAnimationFrame(() => {});
+    nav.classList.toggle('scrolled', window.scrollY > 60);
   }
 
   window.addEventListener('scroll', updateNav, { passive: true });
+  updateNav();
+})();
+
+
+// ---- Scroll-spy：高亮当前 section 对应的导航项 ----
+(function() {
+  const navLinks = Array.from(document.querySelectorAll('.nav-link'));
+  if (!navLinks.length) return;
+  const sections = navLinks
+    .map(a => document.querySelector(a.getAttribute('href')))
+    .filter(Boolean);
+  if (!sections.length) return;
+
+  const OFFSET = 100;
+
+  function update() {
+    let current = sections[0];
+    for (const sec of sections) {
+      if (sec.getBoundingClientRect().top <= OFFSET) current = sec;
+    }
+    const id = current.getAttribute('id');
+    navLinks.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + id));
+  }
+
+  window.addEventListener('scroll', update, { passive: true });
+  window.addEventListener('resize', update);
+  update();
+})();
+
+
+// ---- Mobile 导航菜单切换 ----
+(function() {
+  const nav = document.getElementById('nav');
+  const toggle = document.getElementById('navToggle');
+  if (!nav || !toggle) return;
+
+  toggle.addEventListener('click', () => {
+    const open = nav.classList.toggle('open');
+    toggle.setAttribute('aria-expanded', String(open));
+    toggle.setAttribute('aria-label', open ? '关闭菜单' : '打开菜单');
+  });
+
+  nav.querySelectorAll('.nav-link').forEach(a => {
+    a.addEventListener('click', () => {
+      nav.classList.remove('open');
+      toggle.setAttribute('aria-expanded', 'false');
+      toggle.setAttribute('aria-label', '打开菜单');
+    });
+  });
 })();
 
 
@@ -314,6 +441,16 @@
   lb.querySelector('.lightbox-close').addEventListener('click', close);
   lb.querySelector('.lightbox-prev').addEventListener('click', prev);
   lb.querySelector('.lightbox-next').addEventListener('click', next);
+  // 移动端左右滑动切图
+  let touchX = null;
+  lb.addEventListener('touchstart', (e) => { touchX = e.changedTouches[0].clientX; }, { passive: true });
+  lb.addEventListener('touchend', (e) => {
+    if (touchX === null) return;
+    const dx = e.changedTouches[0].clientX - touchX;
+    if (Math.abs(dx) > 40) { dx < 0 ? next() : prev(); }
+    touchX = null;
+  });
+
   lb.addEventListener('click', (e) => { if (e.target === lb) close(); });
   document.addEventListener('keydown', (e) => {
     if (!lb.classList.contains('active')) return;
@@ -325,6 +462,9 @@
 
 // ---- Hover glow effect on project cards ----
 (function() {
+  // 触屏设备无 hover，减少动态效果时禁用 tilt
+  if (prefersReducedMotion || window.matchMedia('(hover: none)').matches) return;
+
   document.querySelectorAll('.project-card').forEach(card => {
     card.addEventListener('mousemove', (e) => {
       const rect = card.getBoundingClientRect();
@@ -339,5 +479,147 @@
     card.addEventListener('mouseleave', () => {
       card.style.transform = '';
     });
+  });
+})();
+
+
+// ---- 顶部滚动进度条 ----
+(function() {
+  const bar = document.getElementById('scrollProgress');
+  if (!bar) return;
+  let ticking = false;
+  function update() {
+    const max = document.documentElement.scrollHeight - window.innerHeight;
+    const p = max > 0 ? Math.min(window.scrollY / max, 1) : 0;
+    bar.style.transform = 'scaleX(' + p.toFixed(4) + ')';
+    ticking = false;
+  }
+  window.addEventListener('scroll', () => {
+    if (!ticking) { requestAnimationFrame(update); ticking = true; }
+  }, { passive: true });
+  update();
+})();
+
+
+// ---- 光标光晕（仅桌面精确指针） ----
+(function() {
+  const glow = document.getElementById('cursorGlow');
+  if (!glow || prefersReducedMotion) return;
+  if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+
+  let tx = -400, ty = -400, x = -400, y = -400, shown = false;
+  document.addEventListener('mousemove', (e) => {
+    tx = e.clientX; ty = e.clientY;
+    if (!shown) { shown = true; glow.classList.add('on'); }
+  }, { passive: true });
+  document.addEventListener('mouseleave', () => { shown = false; glow.classList.remove('on'); });
+
+  (function loop() {
+    x += (tx - x) * 0.12;
+    y += (ty - y) * 0.12;
+    glow.style.transform = 'translate3d(' + x.toFixed(1) + 'px, ' + y.toFixed(1) + 'px, 0)';
+    requestAnimationFrame(loop);
+  })();
+})();
+
+
+// ---- Hero 鼠标视差 ----
+(function() {
+  if (prefersReducedMotion) return;
+  const hero = document.querySelector('.hero');
+  const content = document.querySelector('.hero-content');
+  if (!hero || !content) return;
+  if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+
+  let tx = 0, ty = 0, x = 0, y = 0;
+  hero.addEventListener('mousemove', (e) => {
+    const r = hero.getBoundingClientRect();
+    tx = ((e.clientX - r.left) / r.width - 0.5) * -16;
+    ty = ((e.clientY - r.top) / r.height - 0.5) * -10;
+  }, { passive: true });
+  hero.addEventListener('mouseleave', () => { tx = 0; ty = 0; });
+
+  (function loop() {
+    x += (tx - x) * 0.06;
+    y += (ty - y) * 0.06;
+    if (Math.abs(x) > 0.05 || Math.abs(y) > 0.05) {
+      content.style.transform = 'translate3d(' + x.toFixed(2) + 'px, ' + y.toFixed(2) + 'px, 0)';
+    } else if (x !== 0 || y !== 0) {
+      x = 0; y = 0;
+      content.style.transform = '';
+    }
+    requestAnimationFrame(loop);
+  })();
+})();
+
+
+// ---- Hero 遥测读数：帧计数 + 滚出淡出 ----
+(function() {
+  const hero = document.querySelector('.hero');
+  const readout = document.querySelector('.hero-readout');
+  const pos = document.getElementById('rdPos');
+  const frame = document.getElementById('rdFrame');
+  if (!hero || !readout) return;
+
+  if (!prefersReducedMotion && frame) {
+    let n = 0;
+    setInterval(() => { n = (n + 1) % 1000000; frame.textContent = String(n).padStart(6, '0'); }, 40);
+  }
+  if (pos) {
+    window.addEventListener('mousemove', (e) => {
+      pos.textContent = String(e.clientX).padStart(4, '0') + ' : ' + String(e.clientY).padStart(4, '0');
+    }, { passive: true });
+  }
+
+  let ticking = false;
+  function update() {
+    readout.classList.toggle('dimmed', window.scrollY > hero.offsetHeight * 0.55);
+    ticking = false;
+  }
+  window.addEventListener('scroll', () => {
+    if (!ticking) { requestAnimationFrame(update); ticking = true; }
+  }, { passive: true });
+})();
+
+
+// ---- 项目指标数字滚动 ----
+(function() {
+  const els = document.querySelectorAll('.metric-value[data-count]');
+  if (!els.length || prefersReducedMotion) return;
+
+  function animate(el) {
+    const target = parseFloat(el.dataset.count);
+    const decimals = parseInt(el.dataset.decimals) || 0;
+    const prefix = el.dataset.prefix || '';
+    const suffix = el.dataset.suffix || '';
+    const duration = 1500;
+    const start = performance.now();
+    function tick(now) {
+      const p = Math.min((now - start) / duration, 1);
+      const eased = p === 1 ? 1 : 1 - Math.pow(2, -10 * p);
+      el.textContent = prefix + (target * eased).toFixed(decimals) + suffix;
+      if (p < 1) requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  }
+
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) { animate(e.target); obs.unobserve(e.target); }
+    });
+  }, { threshold: 0.4 });
+  els.forEach(el => obs.observe(el));
+})();
+
+
+// ---- 技能标签交错索引 + 图片加载淡入 ----
+(function() {
+  document.querySelectorAll('.skill-cloud .skill-tag').forEach((t, i) => t.style.setProperty('--i', i));
+
+  const imgs = document.querySelectorAll('.gallery-item img, .about-photo');
+  imgs.forEach(img => {
+    if (img.complete) { img.classList.add('loaded'); return; }
+    img.addEventListener('load', () => img.classList.add('loaded'));
+    img.addEventListener('error', () => img.classList.add('loaded'));
   });
 })();
