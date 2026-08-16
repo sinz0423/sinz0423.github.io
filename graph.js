@@ -90,6 +90,7 @@
     if (decay !== false) {                    // 静态布局时固定满能量
       alpha *= (1 - ALPHA_DECAY);
       if (alpha < 0.002) alpha = 0.002;
+      if (dragging) alpha = Math.max(alpha, 0.25);   // 拖拽时适度加热，相连节点跟随
     }
     const aScale = alpha;
     const cx = W / 2, cy = H / 2;
@@ -213,41 +214,39 @@
     return best;
   }
 
-  // ---- 交互：拖拽节点 / 平移空白 / 悬停 ----
-  let panning = null;   // {sx, sy, vx, vy}
+  // ---- 交互：拖拽节点 / 滚轮缩放 / 悬停 ----
+  // 画布在页面中居中，鼠标坐标必须先扣除画布偏移再换算，否则判定与视觉错位
+  function canvasPoint(cx, cy) {
+    const r = canvas.getBoundingClientRect();
+    return { x: cx - r.left, y: cy - r.top };
+  }
 
   function setCursor(mode) {
     canvas.style.cursor = mode;
   }
 
   function onDown(e) {
-    const n = nodeAt(e.clientX, e.clientY);
+    const p = canvasPoint(e.clientX, e.clientY);
+    const n = nodeAt(p.x, p.y);
     if (n) {
       dragging = n;
       hoverId = n.id;
       showTip(n, e.clientX, e.clientY);
       setCursor('grabbing');
-    } else {
-      panning = { sx: e.clientX, sy: e.clientY, vx: view.x, vy: view.y };
-      setCursor('grabbing');
     }
   }
 
   function onMove(e) {
+    const p = canvasPoint(e.clientX, e.clientY);
     if (dragging) {
-      const w = toWorld(e.clientX, e.clientY);
+      const w = toWorld(p.x, p.y);
       dragging.x = Math.max(-W * 0.5, Math.min(W * 1.5, w.x));
       dragging.y = Math.max(-H * 0.5, Math.min(H * 1.5, w.y));
       hoverId = dragging.id;
       showTip(dragging, e.clientX, e.clientY);
       return;
     }
-    if (panning) {
-      view.x = panning.vx + (e.clientX - panning.sx);
-      view.y = panning.vy + (e.clientY - panning.sy);
-      return;
-    }
-    const n = nodeAt(e.clientX, e.clientY);
+    const n = nodeAt(p.x, p.y);
     if (n) {
       if (hoverId !== n.id) hoverId = n.id;
       setCursor('grab');
@@ -262,21 +261,20 @@
   function onUp() {
     if (dragging) { dragging.vx = 0; dragging.vy = 0; }
     dragging = null;
-    panning = null;
     setCursor('grab');
   }
 
   function onWheel(e) {
     e.preventDefault();
+    const p = canvasPoint(e.clientX, e.clientY);
     const factor = Math.exp(-e.deltaY * 0.0012);
     const next = Math.max(SCALE_MIN, Math.min(SCALE_MAX, view.scale * factor));
-    // 以光标为中心缩放
-    const wx = (e.clientX - view.x) / view.scale;
-    const wy = (e.clientY - view.y) / view.scale;
+    // 以光标为锚点缩放：缩放前后光标下的世界点保持不动
+    const wx = (p.x - view.x) / view.scale;
+    const wy = (p.y - view.y) / view.scale;
     view.scale = next;
-    view.x = e.clientX - wx * view.scale;
-    view.y = e.clientY - wy * view.scale;
-    // 缩放时隐藏 tooltip 避免错位
+    view.x = p.x - wx * view.scale;
+    view.y = p.y - wy * view.scale;
     if (hoverId !== null) { hideTip(); hoverId = null; }
   }
 
@@ -374,7 +372,7 @@
     }
     for (let i = 0; i < 70; i++) step();   // 预收敛：把初始爆发消化在首帧之前
     (function frame() {
-      if (!dragging) step();    // 拖拽期间暂停物理：只移动被抓住的节点
+      step();
       draw();
       requestAnimationFrame(frame);
     })();
