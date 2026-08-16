@@ -220,6 +220,13 @@
     const r = canvas.getBoundingClientRect();
     return { x: cx - r.left, y: cy - r.top };
   }
+  function touchDist(a, b) {
+    const dx = a.clientX - b.clientX, dy = a.clientY - b.clientY;
+    return Math.sqrt(dx * dx + dy * dy) || 1;
+  }
+  function touchMid(a, b) {
+    return { x: (a.clientX + b.clientX) / 2, y: (a.clientY + b.clientY) / 2 };
+  }
 
   function setCursor(mode) {
     canvas.style.cursor = mode;
@@ -264,18 +271,21 @@
     setCursor('grab');
   }
 
+  // 以锚点（光标 / 双指中点）为基准缩放：缩放前后锚点下的世界点保持不动
+  function zoomAt(px, py, factor) {
+    const next = Math.max(SCALE_MIN, Math.min(SCALE_MAX, view.scale * factor));
+    const wx = (px - view.x) / view.scale;
+    const wy = (py - view.y) / view.scale;
+    view.scale = next;
+    view.x = px - wx * view.scale;
+    view.y = py - wy * view.scale;
+    if (hoverId !== null) { hideTip(); hoverId = null; }
+  }
+
   function onWheel(e) {
     e.preventDefault();
     const p = canvasPoint(e.clientX, e.clientY);
-    const factor = Math.exp(-e.deltaY * 0.0012);
-    const next = Math.max(SCALE_MIN, Math.min(SCALE_MAX, view.scale * factor));
-    // 以光标为锚点缩放：缩放前后光标下的世界点保持不动
-    const wx = (p.x - view.x) / view.scale;
-    const wy = (p.y - view.y) / view.scale;
-    view.scale = next;
-    view.x = p.x - wx * view.scale;
-    view.y = p.y - wy * view.scale;
-    if (hoverId !== null) { hideTip(); hoverId = null; }
+    zoomAt(p.x, p.y, Math.exp(-e.deltaY * 0.0012));
   }
 
   canvas.addEventListener('mousedown', onDown);
@@ -284,20 +294,46 @@
   canvas.addEventListener('mouseleave', () => { hoverId = null; hideTip(); });
   canvas.addEventListener('wheel', onWheel, { passive: false });
 
-  // 触摸：拖动节点或平移
+  // 触摸：单指拖节点，双指捏合缩放
+  let pinch = null;                          // {d0}：捏合起始指距
+
   canvas.addEventListener('touchstart', e => {
-    if (e.touches.length === 1) {
+    if (e.touches.length >= 2) {
+      pinch = { d0: touchDist(e.touches[0], e.touches[1]) };
+      if (dragging) { dragging.vx = 0; dragging.vy = 0; dragging = null; }
+      setCursor('grabbing');
+      e.preventDefault();
+    } else if (e.touches.length === 1 && !pinch) {
       const t = e.touches[0];
       onDown({ clientX: t.clientX, clientY: t.clientY });
     }
-  }, { passive: true });
+  }, { passive: false });
+
   canvas.addEventListener('touchmove', e => {
-    if (e.touches.length === 1) {
+    if (pinch && e.touches.length >= 2) {
+      const a = e.touches[0], b = e.touches[1];
+      const m = touchMid(a, b);
+      const p = canvasPoint(m.x, m.y);
+      zoomAt(p.x, p.y, touchDist(a, b) / pinch.d0);   // 以双指中点为锚缩放
+      e.preventDefault();
+    } else if (e.touches.length === 1) {
       const t = e.touches[0];
       onMove({ clientX: t.clientX, clientY: t.clientY });
     }
+  }, { passive: false });
+
+  canvas.addEventListener('touchend', e => {
+    if (pinch) {
+      pinch = null;
+      setCursor('grab');
+      if (e.touches.length === 1) {                    // 抬起一指后继续拖拽
+        const t = e.touches[0];
+        onDown({ clientX: t.clientX, clientY: t.clientY });
+      }
+      return;
+    }
+    onUp();
   }, { passive: true });
-  canvas.addEventListener('touchend', () => onUp());
 
   // ---- 渲染（世界坐标 + 视口变换）----
   function draw() {
@@ -366,6 +402,7 @@
       const refresh = () => draw();
       canvas.addEventListener('mousemove', refresh);
       canvas.addEventListener('wheel', refresh);
+      canvas.addEventListener('touchmove', refresh);
       window.addEventListener('mouseup', refresh);
       canvas.addEventListener('touchend', refresh);
       return;
