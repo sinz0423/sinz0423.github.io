@@ -86,13 +86,10 @@
   let dragging = null;       // 被拖拽的节点
   let alpha = 1;             // 全局能量（所有力乘以它）
 
-  function reheat() { alpha = 1; }
-
   function step(decay) {
     if (decay !== false) {                    // 静态布局时固定满能量
       alpha *= (1 - ALPHA_DECAY);
       if (alpha < 0.002) alpha = 0.002;
-      if (dragging) alpha = Math.max(alpha, 0.3);   // 拖拽期间保持响应
     }
     const aScale = alpha;
     const cx = W / 2, cy = H / 2;
@@ -230,7 +227,6 @@
       hoverId = n.id;
       showTip(n, e.clientX, e.clientY);
       setCursor('grabbing');
-      reheat();                     // 拖拽重新加热，相连节点随之响应
     } else {
       panning = { sx: e.clientX, sy: e.clientY, vx: view.x, vy: view.y };
       setCursor('grabbing');
@@ -378,7 +374,7 @@
     }
     for (let i = 0; i < 70; i++) step();   // 预收敛：把初始爆发消化在首帧之前
     (function frame() {
-      step();
+      if (!dragging) step();    // 拖拽期间暂停物理：只移动被抓住的节点
       draw();
       requestAnimationFrame(frame);
     })();
