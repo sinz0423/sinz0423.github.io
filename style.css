@@ -854,7 +854,7 @@ html.js .about-layout.revealed .skill-cloud .skill-tag {
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   cursor: grab;
-  touch-action: pan-y;
+  touch-action: none;   /* 全部手势交给 JS：拖节点不带动页面滚动、双指捏合可靠 */
 }
 .graph-legend {
   display: flex;

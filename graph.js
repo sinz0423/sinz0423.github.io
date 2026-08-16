@@ -306,6 +306,7 @@
     } else if (e.touches.length === 1 && !pinch) {
       const t = e.touches[0];
       onDown({ clientX: t.clientX, clientY: t.clientY });
+      e.preventDefault();           // 抑制浏览器接管手势（配合 touch-action:none）
     }
   }, { passive: false });
 
