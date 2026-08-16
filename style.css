@@ -853,7 +853,8 @@ html.js .about-layout.revealed .skill-cloud .skill-tag {
     rgba(8,13,22,0.35);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
-  cursor: crosshair;
+  cursor: grab;
+  touch-action: pan-y;
 }
 .graph-legend {
   display: flex;
@@ -877,6 +878,14 @@ html.js .about-layout.revealed .skill-cloud .skill-tag {
   height: 8px;
   border-radius: 50%;
   flex-shrink: 0;
+}
+.graph-hint {
+  margin-top: 1.2rem;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.04em;
+  color: var(--color-text-muted);
 }
 .graph-tooltip {
   position: fixed;

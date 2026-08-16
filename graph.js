@@ -1,6 +1,6 @@
 /* ===================================
    苏浩哲 · 个人主页 — 课程知识图谱
-   自研力导向布局 · 悬停显示名称 · 主题配色
+   持续力导向布局 · 节点拖拽 / 空白平移 / 滚轮缩放 · 悬停显示名称
    =================================== */
 
 (function() {
@@ -49,16 +49,6 @@
     if (n.type === '主笔记') return 7;
     return 2.2 + 2.8 * (n.degree / maxDeg);
   }
-  function nodeAt(x, y) {
-    let best = null, bestD = Infinity;
-    for (const n of nodes) {
-      const dx = n.x - x, dy = n.y - y;
-      const d = dx * dx + dy * dy;
-      const r = radiusOf(n) + 6;
-      if (d < r * r && d < bestD) { best = n; bestD = d; }
-    }
-    return best;
-  }
 
   // ---- 画布尺寸（DPR 适配）----
   let W = 0, H = 0;
@@ -71,38 +61,50 @@
     W = cw; H = ch;
     canvas.width = Math.round(cw * dpr);
     canvas.height = Math.round(ch * dpr);
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     if (scale !== 1 && isFinite(scale)) {
       nodes.forEach(n => { n.x *= scale; n.y *= scale; });
     }
   }
 
-  // ---- 物理参数 ----
-  const REST = 62;          // 链接理想距离
-  const K_LINK = 0.05;      // 弹簧系数
-  const K_REP = 2600;       // 排斥强度（/d²）
-  const K_CENTER = 0.008;   // 向心引力
-  const DAMP = 0.85;        // 速度阻尼
+  // ---- 视口（平移 / 缩放）----
+  const view = { x: 0, y: 0, scale: 1 };
+  const SCALE_MIN = 0.5, SCALE_MAX = 3.5;
+
+  function toWorld(sx, sy) {
+    return { x: (sx - view.x) / view.scale, y: (sy - view.y) / view.scale };
+  }
+
+  // ---- 物理（世界坐标，持续运行）----
+  const REST = 62;
+  const K_LINK = 0.05;
+  const K_REP = 2600;
+  const K_CENTER = 0.008;
+  const DAMP = 0.85;
+
+  let dragging = null;   // 被拖拽的节点
 
   function step() {
     const cx = W / 2, cy = H / 2;
-    for (const n of nodes) {          // 向心
+    for (const n of nodes) {
+      if (n === dragging) continue;
       n.vx += (cx - n.x) * K_CENTER;
       n.vy += (cy - n.y) * K_CENTER;
     }
-    for (const l of links) {          // 链接弹簧
+    for (const l of links) {
       const a = l.source, b = l.target;
       let dx = b.x - a.x, dy = b.y - a.y;
       let d = Math.sqrt(dx * dx + dy * dy) || 1;
       const f = K_LINK * (d - REST);
       dx /= d; dy /= d;
-      a.vx += dx * f; a.vy += dy * f;
-      b.vx -= dx * f; b.vy -= dy * f;
+      if (a !== dragging) { a.vx += dx * f; a.vy += dy * f; }
+      if (b !== dragging) { b.vx -= dx * f; b.vy -= dy * f; }
     }
-    for (let i = 0; i < nodes.length; i++) {   // 全对排斥
+    for (let i = 0; i < nodes.length; i++) {
       const a = nodes[i];
+      if (a === dragging) continue;
       for (let j = i + 1; j < nodes.length; j++) {
         const b = nodes[j];
+        if (b === dragging) continue;
         const dx = a.x - b.x, dy = a.y - b.y;
         const d2 = Math.max(1, dx * dx + dy * dy);
         const d = Math.sqrt(d2);
@@ -112,16 +114,13 @@
         a.vy += uy * f; b.vy -= uy * f;
       }
     }
-    let maxSpeed = 0;
-    for (const n of nodes) {          // 积分 + 阻尼 + 边界
+    for (const n of nodes) {
+      if (n === dragging) { n.vx = 0; n.vy = 0; continue; }
       n.vx *= DAMP; n.vy *= DAMP;
       n.x += n.vx; n.y += n.vy;
-      const sp = n.vx * n.vx + n.vy * n.vy;
-      if (sp > maxSpeed) maxSpeed = sp;
-      n.x = Math.max(16, Math.min(W - 16, n.x));
-      n.y = Math.max(16, Math.min(H - 16, n.y));
+      n.x = Math.max(-W * 0.5, Math.min(W * 1.5, n.x));
+      n.y = Math.max(-H * 0.5, Math.min(H * 1.5, n.y));
     }
-    return maxSpeed;
   }
 
   function initPositions() {
@@ -135,7 +134,7 @@
     }
   }
 
-  // ---- tooltip（仅显示名称，不做点击跳转）----
+  // ---- tooltip（名称 + 科目 + Obsidian 笔记库）----
   const tip = document.createElement('div');
   tip.className = 'graph-tooltip';
   tip.setAttribute('role', 'tooltip');
@@ -148,7 +147,7 @@
       '<span class="graph-tooltip-sub"></span>';
     tip.querySelector('.graph-tooltip-name').textContent = n.name;
     tip.querySelector('.graph-tooltip-sub').textContent =
-      n.course + (n.type === '主笔记' ? ' · 课程' : '');
+      n.course + (n.type === '主笔记' ? ' · 课程' : '') + ' · Obsidian 笔记库';
     tip.style.opacity = '1';
     const tw = tip.offsetWidth, th = tip.offsetHeight;
     let left = px + 14, top = py + 14;
@@ -159,25 +158,111 @@
   }
   function hideTip() { tip.style.opacity = '0'; }
 
-  function onMove(e) {
-    const rect = canvas.getBoundingClientRect();
-    const n = nodeAt(e.clientX - rect.left, e.clientY - rect.top);
+  function nodeAt(sx, sy) {
+    const w = toWorld(sx, sy);
+    let best = null, bestD = Infinity;
+    for (const n of nodes) {
+      const dx = n.x - w.x, dy = n.y - w.y;
+      const d = dx * dx + dy * dy;
+      const r = radiusOf(n) + 14 / view.scale;   // 命中半径随缩放增大
+      if (d < r * r && d < bestD) { best = n; bestD = d; }
+    }
+    return best;
+  }
+
+  // ---- 交互：拖拽节点 / 平移空白 / 悬停 ----
+  let panning = null;   // {sx, sy, vx, vy}
+
+  function setCursor(mode) {
+    canvas.style.cursor = mode;
+  }
+
+  function onDown(e) {
+    const n = nodeAt(e.clientX, e.clientY);
     if (n) {
+      dragging = n;
       hoverId = n.id;
       showTip(n, e.clientX, e.clientY);
+      setCursor('grabbing');
     } else {
-      hoverId = null;
-      hideTip();
+      panning = { sx: e.clientX, sy: e.clientY, vx: view.x, vy: view.y };
+      setCursor('grabbing');
     }
   }
-  canvas.addEventListener('mousemove', onMove);
-  canvas.addEventListener('mouseleave', () => { hoverId = null; hideTip(); });
-  canvas.addEventListener('touchmove', onMove, { passive: true });
-  canvas.addEventListener('touchend', () => { hoverId = null; hideTip(); });
 
-  // ---- 渲染 ----
+  function onMove(e) {
+    if (dragging) {
+      const w = toWorld(e.clientX, e.clientY);
+      dragging.x = Math.max(-W * 0.5, Math.min(W * 1.5, w.x));
+      dragging.y = Math.max(-H * 0.5, Math.min(H * 1.5, w.y));
+      hoverId = dragging.id;
+      showTip(dragging, e.clientX, e.clientY);
+      return;
+    }
+    if (panning) {
+      view.x = panning.vx + (e.clientX - panning.sx);
+      view.y = panning.vy + (e.clientY - panning.sy);
+      return;
+    }
+    const n = nodeAt(e.clientX, e.clientY);
+    if (n) {
+      if (hoverId !== n.id) hoverId = n.id;
+      setCursor('grab');
+      showTip(n, e.clientX, e.clientY);
+    } else {
+      if (hoverId !== null) hideTip();
+      hoverId = null;
+      setCursor('grab');
+    }
+  }
+
+  function onUp() {
+    if (dragging) { dragging.vx = 0; dragging.vy = 0; }
+    dragging = null;
+    panning = null;
+    setCursor('grab');
+  }
+
+  function onWheel(e) {
+    e.preventDefault();
+    const factor = Math.exp(-e.deltaY * 0.0012);
+    const next = Math.max(SCALE_MIN, Math.min(SCALE_MAX, view.scale * factor));
+    // 以光标为中心缩放
+    const wx = (e.clientX - view.x) / view.scale;
+    const wy = (e.clientY - view.y) / view.scale;
+    view.scale = next;
+    view.x = e.clientX - wx * view.scale;
+    view.y = e.clientY - wy * view.scale;
+    // 缩放时隐藏 tooltip 避免错位
+    if (hoverId !== null) { hideTip(); hoverId = null; }
+  }
+
+  canvas.addEventListener('mousedown', onDown);
+  canvas.addEventListener('mousemove', onMove);
+  window.addEventListener('mouseup', onUp);
+  canvas.addEventListener('mouseleave', () => { hoverId = null; hideTip(); });
+  canvas.addEventListener('wheel', onWheel, { passive: false });
+
+  // 触摸：拖动节点或平移
+  canvas.addEventListener('touchstart', e => {
+    if (e.touches.length === 1) {
+      const t = e.touches[0];
+      onDown({ clientX: t.clientX, clientY: t.clientY });
+    }
+  }, { passive: true });
+  canvas.addEventListener('touchmove', e => {
+    if (e.touches.length === 1) {
+      const t = e.touches[0];
+      onMove({ clientX: t.clientX, clientY: t.clientY });
+    }
+  }, { passive: true });
+  canvas.addEventListener('touchend', () => onUp());
+
+  // ---- 渲染（世界坐标 + 视口变换）----
   function draw() {
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.clearRect(0, 0, W, H);
+    ctx.setTransform(dpr * view.scale, 0, 0, dpr * view.scale, dpr * view.x, dpr * view.y);
 
     ctx.lineWidth = 1;
     for (const l of links) {
@@ -193,7 +278,7 @@
     for (const n of nodes) {
       const r = radiusOf(n);
       const col = colorOf(n);
-      if (hoverId === n.id) {          // 悬停光晕
+      if (hoverId === n.id) {
         const g = ctx.createRadialGradient(n.x, n.y, r * 0.4, n.x, n.y, r * 2.8);
         g.addColorStop(0, 'rgba(200,145,90,0.32)');
         g.addColorStop(1, 'rgba(200,145,90,0)');
@@ -206,7 +291,7 @@
       ctx.arc(n.x, n.y, r, 0, Math.PI * 2);
       ctx.fillStyle = col;
       ctx.fill();
-      if (n.type === '主笔记') {       // 主笔记描边，更醒目
+      if (n.type === '主笔记') {
         ctx.strokeStyle = 'rgba(255,255,255,0.30)';
         ctx.lineWidth = 1;
         ctx.stroke();
@@ -223,6 +308,8 @@
         ctx.stroke();
       }
     }
+
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   }
 
   // ---- 启动 ----
@@ -231,37 +318,37 @@
 
   function start() {
     initPositions();
-    let settled = false, frames = 0;
+    if (reducedMotion) {
+      for (let i = 0; i < 500; i++) step();
+      draw();
+      // 交互（拖拽/平移/缩放/悬停）后按需重绘，不运行动画
+      const refresh = () => draw();
+      canvas.addEventListener('mousemove', refresh);
+      canvas.addEventListener('wheel', refresh);
+      window.addEventListener('mouseup', refresh);
+      canvas.addEventListener('touchend', refresh);
+      return;
+    }
     (function frame() {
-      if (!settled) {
-        frames++;
-        const ms = step();
-        if (ms < 0.05 || frames > 1600) settled = true;
-      }
+      step();
       draw();
       requestAnimationFrame(frame);
     })();
   }
 
-  if (reducedMotion) {
-    initPositions();
-    for (let i = 0; i < 500; i++) step();
-    draw();
+  const rect = wrap.getBoundingClientRect();
+  const inView = rect.top < window.innerHeight && rect.bottom > 0;
+  if (inView) {
+    start();
   } else {
-    const rect = wrap.getBoundingClientRect();
-    const inView = rect.top < window.innerHeight && rect.bottom > 0;
-    if (inView) {
-      start();                       // 首屏内直接启动
-    } else {
-      const io = new IntersectionObserver(entries => {
-        entries.forEach(en => {
-          if (!en.isIntersecting) return;
-          io.disconnect();
-          start();
-        });
-      }, { threshold: 0.08 });
-      io.observe(wrap);
-    }
+    const io = new IntersectionObserver(entries => {
+      entries.forEach(en => {
+        if (!en.isIntersecting) return;
+        io.disconnect();
+        start();
+      });
+    }, { threshold: 0.08 });
+    io.observe(wrap);
   }
 
   // ---- 图例（与配色表同一来源）----

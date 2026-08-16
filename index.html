@@ -26,10 +26,10 @@
     <div class="nav-links" id="navLinks">
       <a href="#about" class="nav-link">关于</a>
       <a href="#education" class="nav-link">学业</a>
-      <a href="#graph" class="nav-link">图谱</a>
       <a href="#projects" class="nav-link">项目</a>
       <a href="#research" class="nav-link">研究</a>
       <a href="#awards" class="nav-link">获奖</a>
+      <a href="#graph" class="nav-link">图谱</a>
       <a href="#lab" class="nav-link">实验室</a>
       <a href="#contact" class="nav-link">联系</a>
     </div>
@@ -167,18 +167,6 @@
         <div class="course-name">自动控制原理</div>
         <div class="course-bar"><div class="course-bar-fill" style="--w:96%"></div></div>
       </div>
-    </div>
-  </section>
-
-  <!-- ====== Knowledge Graph ====== -->
-  <section id="graph" class="section section--alt">
-    <div class="section-eyebrow reveal">Knowledge</div>
-    <h2 class="section-title reveal">知识图谱</h2>
-    <p class="section-subtitle reveal">专业课知识体系：十门课程、两百余个知识点及其内在联系，悬停查看知识点名称。</p>
-
-    <div class="graph-wrap reveal">
-      <canvas id="knowledgeGraph" aria-label="课程知识图谱"></canvas>
-      <div class="graph-legend"></div>
     </div>
   </section>
 
@@ -488,6 +476,19 @@
         <span class="summary-num">1</span>
         <span class="summary-label">专利受理中</span>
       </div>
+    </div>
+  </section>
+
+  <!-- ====== Knowledge Graph ====== -->
+  <section id="graph" class="section section--alt">
+    <div class="section-eyebrow reveal">Knowledge</div>
+    <h2 class="section-title reveal">知识图谱</h2>
+    <p class="section-subtitle reveal">本图谱源于我的 Obsidian 专业课笔记知识库：十门课程、两百余个知识点及其内在联系，每一处均对应一篇可追溯的笔记，体现系统的知识组织与学习规划能力。</p>
+
+    <div class="graph-wrap reveal">
+      <canvas id="knowledgeGraph" aria-label="课程知识图谱"></canvas>
+      <div class="graph-legend"></div>
+      <p class="graph-hint">拖动节点 · 拖拽空白平移 · 滚轮缩放 · 悬停查看名称</p>
     </div>
   </section>
 
