@@ -79,8 +79,8 @@
   const K_LINK = 0.05;
   const K_REP = 2600;
   const K_CENTER = 0.008;
-  const DAMP = 0.80;         // 速度阻尼（越大越稳，抑制跳跃）
-  const MAX_SPEED = 4;       // 每帧速度上限，防止节点弹飞
+  const DAMP = 0.76;         // 速度阻尼（越大越稳，抑制跳跃）
+  const MAX_SPEED = 3;       // 每帧速度上限，防止节点弹飞
   const ALPHA_DECAY = 0.05;  // 能量衰减速率：系统自然收敛，闲置时安静
 
   let dragging = null;       // 被拖拽的节点
@@ -136,15 +136,48 @@
     }
   }
 
+  // 依据拓扑布位：主笔记环绕中心，关联知识点预先靠近各自主笔记（螺旋簇）
+  // 避免随机初始爆炸式跳动，力模拟只需温和微调
   function initPositions() {
-    const cx = W / 2, cy = H / 2, R = Math.min(W, H) * 0.38;
-    for (const n of nodes) {
-      const a = Math.random() * Math.PI * 2;
-      const r = Math.sqrt(Math.random()) * R;
-      n.x = cx + Math.cos(a) * r;
-      n.y = cy + Math.sin(a) * r;
-      n.vx = 0; n.vy = 0;
-    }
+    const cx = W / 2, cy = H / 2;
+    const R = Math.min(W, H) * 0.30;                     // 主笔记环绕半径
+    const hubs = nodes.filter(n => n.type === '主笔记');
+    const adj = new Map();
+    nodes.forEach(n => adj.set(n.id, []));
+    links.forEach(l => {
+      adj.get(l.source.id).push(l.target.id);
+      adj.get(l.target.id).push(l.source.id);
+    });
+    const placed = new Set();
+
+    hubs.forEach((h, i) => {                             // 1) 主笔记等距环绕
+      const a = (i / hubs.length) * Math.PI * 2 - Math.PI / 2;
+      h.x = cx + Math.cos(a) * R;
+      h.y = cy + Math.sin(a) * R;
+      h.vx = 0; h.vy = 0;
+      placed.add(h.id);
+    });
+
+    hubs.forEach((h, i) => {                             // 2) 邻居螺旋簇靠近其主笔记
+      const nbrs = (adj.get(h.id) || []).filter(id => !placed.has(id));
+      nbrs.forEach((nid, k) => {
+        const n = nodes.find(x => x.id === nid);
+        const a = k * 2.3 + i;
+        const r = 30 + 2.2 * k;
+        n.x = h.x + Math.cos(a) * r;
+        n.y = h.y + Math.sin(a) * r;
+        n.vx = 0; n.vy = 0;
+        placed.add(nid);
+      });
+    });
+
+    nodes.forEach(n => {                                 // 3) 兜底：孤立节点
+      if (!placed.has(n.id)) {
+        n.x = cx + (Math.random() - 0.5) * 60;
+        n.y = cy + (Math.random() - 0.5) * 60;
+        n.vx = 0; n.vy = 0;
+      }
+    });
   }
 
   // ---- tooltip（名称 + 科目 + Obsidian 笔记库）----
@@ -343,6 +376,7 @@
       canvas.addEventListener('touchend', refresh);
       return;
     }
+    for (let i = 0; i < 70; i++) step();   // 预收敛：把初始爆发消化在首帧之前
     (function frame() {
       step();
       draw();
