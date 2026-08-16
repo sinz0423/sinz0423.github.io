@@ -26,6 +26,7 @@
     <div class="nav-links" id="navLinks">
       <a href="#about" class="nav-link">关于</a>
       <a href="#education" class="nav-link">学业</a>
+      <a href="#graph" class="nav-link">图谱</a>
       <a href="#projects" class="nav-link">项目</a>
       <a href="#research" class="nav-link">研究</a>
       <a href="#awards" class="nav-link">获奖</a>
@@ -166,6 +167,18 @@
         <div class="course-name">自动控制原理</div>
         <div class="course-bar"><div class="course-bar-fill" style="--w:96%"></div></div>
       </div>
+    </div>
+  </section>
+
+  <!-- ====== Knowledge Graph ====== -->
+  <section id="graph" class="section section--alt">
+    <div class="section-eyebrow reveal">Knowledge</div>
+    <h2 class="section-title reveal">知识图谱</h2>
+    <p class="section-subtitle reveal">专业课知识体系：十门课程、两百余个知识点及其内在联系，悬停查看知识点名称。</p>
+
+    <div class="graph-wrap reveal">
+      <canvas id="knowledgeGraph" aria-label="课程知识图谱"></canvas>
+      <div class="graph-legend"></div>
     </div>
   </section>
 
@@ -332,46 +345,46 @@
     </div>
   </section>
 
-  <!-- ====== Research Interest ====== -->
+  <!-- ====== Research Direction ====== -->
   <section id="research" class="section section--alt">
-    <div class="section-eyebrow reveal">Vision</div>
+    <div class="section-eyebrow reveal">Research</div>
     <h2 class="section-title reveal">研究方向</h2>
 
     <div class="research-content reveal">
       <p class="research-intro">
-        研究生阶段希望扎根于<strong>视觉感知、智能控制与具身智能</strong>的交叉领域。具身智能的核心挑战——智能体在开放环境中实时感知、理解物理世界并做出可靠决策——与我在竞赛中面对的运动平台视觉伺服问题本质一致：摄像头捕捉的是智能体与环境持续交互中的动态视觉流，感知结果直接影响控制指令，控制执行反过来改变下一帧观测。这种<strong>感知-行动闭环</strong>恰好落在控制工程的学科脉络中。
+        我的研究实践围绕 <strong>嵌入式视觉与智能控制</strong> 展开：让机器通过视觉与传感器理解真实世界，用数据驱动的方法从观测中提炼规律，再把决策实时落地到物理执行。视觉感知、机器学习与控制理论在每一段实践中相互咬合，构成 <strong>感知—建模—控制</strong> 的完整闭环。
       </p>
 
       <div class="research-areas">
         <div class="research-area">
           <div class="research-area-icon">&#9673;</div>
           <div class="research-area-text">
-            <strong>视觉语言模型</strong>在机器人操作场景中的泛化能力
+            <strong>视觉感知</strong>与实时目标识别
           </div>
         </div>
         <div class="research-area">
           <div class="research-area-icon">&#9673;</div>
           <div class="research-area-text">
-            基于<strong>视觉反馈的精细操控</strong>策略
+            <strong>数据驱动建模</strong>：机器学习与物理机理的融合
           </div>
         </div>
         <div class="research-area">
           <div class="research-area-icon">&#9673;</div>
           <div class="research-area-text">
-            仿真到现实的<strong>迁移（Sim-to-Real）</strong>
+            基于<strong>视觉反馈</strong>的运动控制与伺服
           </div>
         </div>
         <div class="research-area">
           <div class="research-area-icon">&#9673;</div>
           <div class="research-area-text">
-            将<strong>物理机理约束</strong>嵌入学习模型的 PINN 方向
+            深度学习模型的<strong>训练、优化与边缘端部署</strong>
           </div>
         </div>
       </div>
 
       <p class="research-outro">
-        不满足于在仿真环境中刷榜调参，希望技术落地到真实物理系统——让机器人在嘈杂工厂可靠抓取，在陌生家庭环境安全导航。<br>
-        这需要深厚的控制理论基础、扎实的视觉算法功底，以及对物理世界的敬畏。
+        不满足于在仿真环境中刷榜调参，更习惯自己动手，把算法从数据、模型一路推到能跑、能控的真实硬件上。<br>
+        这需要扎实的视觉算法功底、对控制系统的理解，以及把每一行代码落到物理世界的耐心。
       </p>
     </div>
   </section>
@@ -546,6 +559,8 @@
     </div>
   </footer>
 
+  <script src="graph-data.js"></script>
+  <script src="graph.js"></script>
   <script src="script.js"></script>
 </body>
 </html>
