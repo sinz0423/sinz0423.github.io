@@ -74,27 +74,38 @@
     return { x: (sx - view.x) / view.scale, y: (sy - view.y) / view.scale };
   }
 
-  // ---- 物理（世界坐标，持续运行）----
+  // ---- 物理（世界坐标，持续运行；能量衰减收敛，拖拽时重新加热）----
   const REST = 62;
   const K_LINK = 0.05;
   const K_REP = 2600;
   const K_CENTER = 0.008;
-  const DAMP = 0.85;
+  const DAMP = 0.80;         // 速度阻尼（越大越稳，抑制跳跃）
+  const MAX_SPEED = 4;       // 每帧速度上限，防止节点弹飞
+  const ALPHA_DECAY = 0.05;  // 能量衰减速率：系统自然收敛，闲置时安静
 
-  let dragging = null;   // 被拖拽的节点
+  let dragging = null;       // 被拖拽的节点
+  let alpha = 1;             // 全局能量（所有力乘以它）
 
-  function step() {
+  function reheat() { alpha = 1; }
+
+  function step(decay) {
+    if (decay !== false) {                    // 静态布局时固定满能量
+      alpha *= (1 - ALPHA_DECAY);
+      if (alpha < 0.002) alpha = 0.002;
+      if (dragging) alpha = Math.max(alpha, 0.3);   // 拖拽期间保持响应
+    }
+    const aScale = alpha;
     const cx = W / 2, cy = H / 2;
     for (const n of nodes) {
       if (n === dragging) continue;
-      n.vx += (cx - n.x) * K_CENTER;
-      n.vy += (cy - n.y) * K_CENTER;
+      n.vx += (cx - n.x) * K_CENTER * aScale;
+      n.vy += (cy - n.y) * K_CENTER * aScale;
     }
     for (const l of links) {
       const a = l.source, b = l.target;
       let dx = b.x - a.x, dy = b.y - a.y;
       let d = Math.sqrt(dx * dx + dy * dy) || 1;
-      const f = K_LINK * (d - REST);
+      const f = K_LINK * (d - REST) * aScale;
       dx /= d; dy /= d;
       if (a !== dragging) { a.vx += dx * f; a.vy += dy * f; }
       if (b !== dragging) { b.vx -= dx * f; b.vy -= dy * f; }
@@ -108,7 +119,7 @@
         const dx = a.x - b.x, dy = a.y - b.y;
         const d2 = Math.max(1, dx * dx + dy * dy);
         const d = Math.sqrt(d2);
-        const f = K_REP / d2;
+        const f = K_REP * aScale / d2;
         const ux = dx / d, uy = dy / d;
         a.vx += ux * f; b.vx -= ux * f;
         a.vy += uy * f; b.vy -= uy * f;
@@ -117,6 +128,8 @@
     for (const n of nodes) {
       if (n === dragging) { n.vx = 0; n.vy = 0; continue; }
       n.vx *= DAMP; n.vy *= DAMP;
+      const sp = Math.sqrt(n.vx * n.vx + n.vy * n.vy);
+      if (sp > MAX_SPEED) { n.vx *= MAX_SPEED / sp; n.vy *= MAX_SPEED / sp; }
       n.x += n.vx; n.y += n.vy;
       n.x = Math.max(-W * 0.5, Math.min(W * 1.5, n.x));
       n.y = Math.max(-H * 0.5, Math.min(H * 1.5, n.y));
@@ -184,6 +197,7 @@
       hoverId = n.id;
       showTip(n, e.clientX, e.clientY);
       setCursor('grabbing');
+      reheat();                     // 拖拽重新加热，相连节点随之响应
     } else {
       panning = { sx: e.clientX, sy: e.clientY, vx: view.x, vy: view.y };
       setCursor('grabbing');
@@ -319,7 +333,7 @@
   function start() {
     initPositions();
     if (reducedMotion) {
-      for (let i = 0; i < 500; i++) step();
+      for (let i = 0; i < 500; i++) step(false);   // 固定满能量，收敛出静态布局
       draw();
       // 交互（拖拽/平移/缩放/悬停）后按需重绘，不运行动画
       const refresh = () => draw();
